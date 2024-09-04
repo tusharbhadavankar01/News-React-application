@@ -55,11 +55,11 @@ export class NewsItem extends Component {
     return (
       <div className='container my-3' style={{ padding: "0 1rem" }}>
         <div className="card" style={cardStyles}>
-          <img src={imgUrl} className="card-img-top" alt="..." style={imageStyles} />
+          <img src={imgUrl ? imgUrl :'/No_Image_Available.png'} className="card-img-top" alt="..." style={imageStyles} />
           <div className="card-body" style={cardBodyStyles}>
             <h5 className="card-title" style={cardTitleStyles}>{title}...</h5>
             <p className="card-text" style={cardTextStyles}>{description}...</p>
-            <a href={newsUrl} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-primary" style={buttonStyles}>Read More</a>
+            <a href={newsUrl} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-dark" style={buttonStyles}>Read More</a>
           </div>
         </div>
       </div>
