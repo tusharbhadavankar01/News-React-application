@@ -98,7 +98,7 @@ export class News extends Component {
             <NewsItem title={element.title ?element.title.slice(0,49):""} description={element.description?element.description.slice(0,80):""} imgUrl={element.urlToImage} newsUrl={element.url}/>
         </div>
 
-        })}   
+        })}
 
         </div>
       </div>
