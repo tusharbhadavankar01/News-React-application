@@ -5,7 +5,7 @@ export class NewsItem extends Component {
     const { title, description, imgUrl, newsUrl } = this.props;
 
     const cardStyles = {
-      width: "100%",
+      width: "105%",
       maxWidth: "26rem",
       height: "400px", // Fixed height
       overflow: "hidden",
