@@ -4,6 +4,7 @@ import Spinner from './Spinner';
 import PropTypes from 'prop-types'
 
 
+
 export class News extends Component {  
   
   static defaultProps={
@@ -18,8 +19,11 @@ export class News extends Component {
     category:PropTypes.string,
 
   }
-    constructor(){
-        super();
+  capatalizeFirstletter=(string)=>{
+    return string.charAt(0).toUpperCase()+string.slice(1)
+  }
+    constructor(props){
+        super(props);
         this.state={
             articles:[],
             loading:false,
@@ -27,8 +31,10 @@ export class News extends Component {
             totalResults:0
             
         }
+        document.title=`NewsDekho-${this.capatalizeFirstletter(this.props.category)}`
     }
-      async updateNews(pageNo){
+      async updateNews(page){
+        this.props.setProgress(5);
         const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apikey=dbe57b028aeb41e285a226a94865f7a7&page=${this.state.page}&pageSize=${this.props.pageSize}`;
         this.setState({ loading: true });
         let data = await fetch(url);
@@ -38,6 +44,8 @@ export class News extends Component {
             totalResults: parsedData.totalResults,
             loading: false
         })
+        this.props.setProgress(100);
+
     }
     
     async componentDidMount(){
@@ -66,7 +74,7 @@ export class News extends Component {
 
     return (
       <div className='container my-3'>
-        <h1 className='text-center' style={{margin:"25px 0px"}}>Top Headlines</h1>
+        <h1 className='text-center' style={{margin:"25px 0px"}}>Top {this.capatalizeFirstletter(this.props.category)} Headlines</h1>
         {this.state.loading && <Spinner/>}
         <div className='row'>
 
