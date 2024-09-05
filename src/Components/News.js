@@ -23,7 +23,9 @@ export class News extends Component {
         this.state={
             articles:[],
             loading:false,
-            page:1
+            page:1,
+            totalResults:""
+            
         }
     }
     async componentDidMount(){
@@ -32,7 +34,7 @@ export class News extends Component {
       let data=await fetch(url);
       let parsedData=await data.json()
       console.log(parsedData);
-      this.setState({articles:parsedData.articles,totalResult:parsedData.totalResult, loading:false})
+      this.setState({articles:parsedData.articles,totalResults:parsedData.totalResults, loading:false})
     }
 
      handlePriviousClick=async()=>{
@@ -51,7 +53,7 @@ export class News extends Component {
 
   handleNextClick= async()=>{
       console.log("next");
-      if(this.state.page+1 > Math.ceil(this.state.totalResult/this.props.pageSize)){
+      if(this.state.page+1 > Math.ceil(this.state.totalResults/this.props.pageSize)){
 
       }
       else{
@@ -69,6 +71,8 @@ export class News extends Component {
     }
     
   render() {
+    const totalPages = Math.ceil(this.state.totalResults / this.props.pageSize);
+
     return (
       <div className='container my-3'>
         <h1 className='text-center' style={{margin:"25px 0px"}}>Top Headlines</h1>
@@ -86,7 +90,9 @@ export class News extends Component {
         </div>
         <div className='container d-flex justify-content-between'>
           <button disabled={this.state.page<=1} type='button' className="btn btn-primary" onClick={this.handlePriviousClick}> &larr; Privious</button>
-          <button disabled={(this.state.page+1 > Math.ceil(this.state.totalResult/this.props.pageSize))} type='button' className="btn btn-primary" onClick={this.handleNextClick}>Next &rarr;</button>
+           {/* Display current page and total pages */}
+           <div className='text-center my-3'><strong>Page: {this.state.page} of {totalPages}</strong></div>    
+       <button disabled={(this.state.page+1 > Math.ceil(this.state.totalResults/this.props.pageSize))} type='button' className="btn btn-primary" onClick={this.handleNextClick}>Next &rarr;</button>
 
         </div>
       </div>
