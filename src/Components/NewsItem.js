@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 export class NewsItem extends Component {
   render() {
-    const { title, description, imgUrl, newsUrl } = this.props;
+    const { title, description, imgUrl, newsUrl,author,date, source } = this.props;
 
     const cardStyles = {
       width: "105%",
@@ -51,14 +51,28 @@ export class NewsItem extends Component {
       alignSelf: "flex-start",
       marginTop: "auto", // Pushes the button to the bottom
     };
+    const badgeStyles = {
+      position: "absolute",
+      top: "10px",
+      right: "10px",
+      backgroundColor: "#dc3545", // Bootstrap red
+      color: "#fff",
+      padding: "0.25rem 0.5rem",
+      borderRadius: "0.375rem",
+      fontSize: "0.75rem",
+    };
 
     return (
       <div className='container my-3' style={{ padding: "0 1rem" }}>
         <div className="card" style={cardStyles}>
+        <span style={badgeStyles} class="position-absolute top-59 start-50  translate-middle badge rounded-pill bg-danger">
+    {source}
+  </span>
           <img src={imgUrl ? imgUrl :'/No_Image_Available.png'} className="card-img-top" alt="..." style={imageStyles} />
           <div className="card-body" style={cardBodyStyles}>
             <h5 className="card-title" style={cardTitleStyles}>{title}...</h5>
             <p className="card-text" style={cardTextStyles}>{description}...</p>
+            <p className='card-text'><small className="text-muted">By {!author?"Unknown":author} on {new Date(date).toGMTString()}</small></p>
             <a href={newsUrl} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-dark" style={buttonStyles}>Read More</a>
           </div>
         </div>
