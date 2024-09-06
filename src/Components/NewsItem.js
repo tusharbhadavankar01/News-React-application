@@ -65,7 +65,7 @@ export class NewsItem extends Component {
     return (
       <div className='container my-3' style={{ padding: "0 1rem" }}>
         <div className="card" style={cardStyles}>
-        <span style={badgeStyles} class="position-absolute top-59 start-50  translate-middle badge rounded-pill bg-danger">
+        <span style={badgeStyles} className="position-absolute top-59 start-50  translate-middle badge rounded-pill bg-danger">
     {source}
   </span>
           <img src={imgUrl ? imgUrl :'/No_Image_Available.png'} className="card-img-top" alt="..." style={imageStyles} />
