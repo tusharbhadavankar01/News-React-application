@@ -3,11 +3,12 @@ import NewsItem from './NewsItem';
 import Spinner from './Spinner';
 import PropTypes from 'prop-types';
 
-const News = ({ country, pageSize, category, apiKey, setProgress }) => {
+const News = ({ country, pageSize, category, apiKey, setProgress, searchQuery }) => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
+  const [error, setError] = useState(null);
 
   const capatalizeFirstletter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -16,21 +17,36 @@ const News = ({ country, pageSize, category, apiKey, setProgress }) => {
   const updateNews = useCallback(async (page) => {
     setProgress(5);
     setLoading(true);
+    setError(null);
 
-    const url = `https://newsapi.org/v2/top-headlines?country=${country}&category=${category}&apikey=${apiKey}&page=${page}&pageSize=${pageSize}`;
-    let data = await fetch(url);
-    let parsedData = await data.json();
+    try {
+      const url = searchQuery 
+        ? `https://newsapi.org/v2/everything?q=${searchQuery}&apikey=${apiKey}&page=${page}&pageSize=${pageSize}`
+        : `https://newsapi.org/v2/top-headlines?country=${country}&category=${category}&apikey=${apiKey}&page=${page}&pageSize=${pageSize}`;
 
-    setArticles(parsedData.articles);
-    setTotalResults(parsedData.totalResults);
-    setLoading(false);
-    setProgress(100);
-  }, [country, category, apiKey, pageSize, setProgress]);
+      let data = await fetch(url);
+      let parsedData = await data.json();
+
+      if (parsedData.status === 'ok') {
+        setArticles(parsedData.articles);
+        setTotalResults(parsedData.totalResults);
+        if (parsedData.totalResults === 0) {
+          setError('No results found');
+        }
+      } else {
+        setError('An error occurred');
+      }
+    } catch (e) {
+      setError('An error occurred');
+    } finally {
+      setLoading(false);
+      setProgress(100);
+    }
+  }, [country, category, apiKey, pageSize, searchQuery, setProgress]);
 
   useEffect(() => {
-    document.title = `NewsDekho-${capatalizeFirstletter(category)}`;
     updateNews(page);
-  }, [category, page, updateNews]);
+  }, [category, page, searchQuery, updateNews]);
 
   const handlePreviousClick = () => {
     if (page > 1) {
@@ -49,10 +65,11 @@ const News = ({ country, pageSize, category, apiKey, setProgress }) => {
   return (
     <div className='container my-3'>
       <h1 className='text-center' style={{ margin: "25px 0px", marginTop: "80px" }}>
-        Top {capatalizeFirstletter(category)} Headlines
+        {searchQuery ? `Search Results for "${searchQuery}"` : `Top ${capatalizeFirstletter(category)} Headlines`}
       </h1>
 
       {loading && <Spinner />}
+      {error && <div className='text-center'>{error}</div>}
 
       <div className='row'>
         {!loading && articles.map((element) => (
@@ -70,23 +87,25 @@ const News = ({ country, pageSize, category, apiKey, setProgress }) => {
         ))}
       </div>
 
-      <div className='container d-flex justify-content-between'>
-        <button disabled={page <= 1} type='button' className="btn btn-primary" onClick={handlePreviousClick}>
-          &larr; Previous
-        </button>
+      {!searchQuery && (
+        <div className='container d-flex justify-content-between'>
+          <button disabled={page <= 1} type='button' className="btn btn-primary" onClick={handlePreviousClick}>
+            &larr; Previous
+          </button>
 
-        <div className='text-center my-3'>
-          <strong>Page: {page} of {loading ? '...' : totalPages}</strong>
+          <div className='text-center my-3'>
+            <strong>Page: {page} of {loading ? '...' : totalPages}</strong>
+          </div>
+
+          <button 
+            disabled={page + 1 > totalPages} 
+            type='button' 
+            className="btn btn-primary" 
+            onClick={handleNextClick}>
+            Next &rarr;
+          </button>
         </div>
-
-        <button 
-          disabled={page + 1 > totalPages} 
-          type='button' 
-          className="btn btn-primary" 
-          onClick={handleNextClick}>
-          Next &rarr;
-        </button>
-      </div>
+      )}
     </div>
   );
 };
@@ -101,6 +120,7 @@ News.propTypes = {
   country: PropTypes.string,
   pageSize: PropTypes.number,
   category: PropTypes.string,
+  searchQuery: PropTypes.string,
 };
 
 export default News;

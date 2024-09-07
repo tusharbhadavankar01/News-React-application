@@ -1,7 +1,17 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
-const Navbar = () => {
+const Navbar = ({ setSearchQuery }) => {
+  const [query, setQuery] = useState('');
+  const navigate = useNavigate();
+
+  const handleSearch = (event) => {
+    event.preventDefault();
+    setSearchQuery(query);
+    navigate(`/?search=${encodeURIComponent(query)}`);
+    setQuery('');
+  };
+
   return (
     <div>
       <nav className="navbar fixed-top navbar-expand-lg bg-body-tertiary">
@@ -22,8 +32,8 @@ const Navbar = () => {
               <li className="nav-item"><Link className="nav-link" to="/sports">Sports</Link></li>  
               <li className="nav-item"><Link className="nav-link" to="/technology">Technology</Link></li>
             </ul>
-            <form className="d-flex " role="search">
-              <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
+            <form className="d-flex" role="search" onSubmit={handleSearch}>
+              <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search" value={query} onChange={(e) => setQuery(e.target.value)} />
               <button className="btn btn-outline-success mx-2" type="submit">Search</button>
             </form>     
           </div>
