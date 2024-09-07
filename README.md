@@ -1,4 +1,6 @@
 # Getting Started with Create React App
+# Note: GitHub Pages may not support client-side routing properly with React Router, which can lead to 404 errors on non-root routes. For a fully functional experience, please clone the repository and run it locally using npm start.
+![alt text](image-2.png)
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
