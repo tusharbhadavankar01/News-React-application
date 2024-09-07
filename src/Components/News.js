@@ -1,131 +1,106 @@
-import React, { Component } from 'react'
-import NewsItem from './NewsItem'
+import React, { useState, useEffect, useCallback } from 'react';
+import NewsItem from './NewsItem';
 import Spinner from './Spinner';
-import PropTypes from 'prop-types'
+import PropTypes from 'prop-types';
 
-export class News extends Component {  
-  static defaultProps = {
-    country: 'in',
-    pageSize: 12,
-    category: "general",
-  }
+const News = ({ country, pageSize, category, apiKey, setProgress }) => {
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
 
-  static propTypes = {
-    country: PropTypes.string,
-    pageSize: PropTypes.number,
-    category: PropTypes.string,
-  }
+  const capatalizeFirstletter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
 
-  capatalizeFirstletter = (string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1)
-  }
+  const updateNews = useCallback(async (page) => {
+    setProgress(5);
+    setLoading(true);
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      articles: [],
-      loading: true,  // Loading is true by default
-      page: 1,
-      totalResults: 0
-    }
-    document.title = `NewsDekho-${this.capatalizeFirstletter(this.props.category)}`
-  }
-
-  async updateNews(page) {
-    this.props.setProgress(5);
-    this.setState({ loading: true });
-
-    const url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apikey=${this.props.apiKey}&page=${page}&pageSize=${this.props.pageSize}`;
+    const url = `https://newsapi.org/v2/top-headlines?country=${country}&category=${category}&apikey=${apiKey}&page=${page}&pageSize=${pageSize}`;
     let data = await fetch(url);
     let parsedData = await data.json();
 
-    this.setState({
-      articles: parsedData.articles,
-      totalResults: parsedData.totalResults,
-      loading: false, // Loading is set to false after data is fetched
-      page: page 
-    });
-    
-    this.props.setProgress(100);
-  }
+    setArticles(parsedData.articles);
+    setTotalResults(parsedData.totalResults);
+    setLoading(false);
+    setProgress(100);
+  }, [country, category, apiKey, pageSize, setProgress]);
 
-  async componentDidMount() {
-    this.updateNews(this.state.page);
-  }
+  useEffect(() => {
+    document.title = `NewsDekho-${capatalizeFirstletter(category)}`;
+    updateNews(page);
+  }, [category, page, updateNews]);
 
-  async componentDidUpdate(prevProps) {
-    if (this.props.category !== prevProps.category) {
-      this.setState({ page: 1 }); // Reset to page 1 when category changes
-      this.updateNews(1);
+  const handlePreviousClick = () => {
+    if (page > 1) {
+      setPage(prevPage => prevPage - 1);
     }
-  }
+  };
 
-  handlePreviousClick = async () => {
-    if (this.state.page > 1) {
-      this.setState({ page: this.state.page - 1 }, () => {
-        this.updateNews(this.state.page);
-      });
+  const handleNextClick = () => {
+    if (page + 1 <= Math.ceil(totalResults / pageSize)) {
+      setPage(prevPage => prevPage + 1);
     }
-  }
+  };
 
-  handleNextClick = async () => {
-    if (this.state.page + 1 <= Math.ceil(this.state.totalResults / this.props.pageSize)) {
-      this.setState({ page: this.state.page + 1 }, () => {
-        this.updateNews(this.state.page);
-      });
-    }
-  }
+  const totalPages = Math.ceil(totalResults / pageSize);
 
-  render() {
-    const totalPages = Math.ceil(this.state.totalResults / this.props.pageSize);
+  return (
+    <div className='container my-3'>
+      <h1 className='text-center' style={{ margin: "25px 0px", marginTop: "80px" }}>
+        Top {capatalizeFirstletter(category)} Headlines
+      </h1>
 
-    return (
-      <div className='container my-3'>
-        <h1 className='text-center' style={{ margin: "25px 0px", marginTop: "80px" }}>
-          Top {this.capatalizeFirstletter(this.props.category)} Headlines
-        </h1>
+      {loading && <Spinner />}
 
-        {this.state.loading && <Spinner />}
-
-        <div className='row'>
-          {!this.state.loading && this.state.articles.map((element) => {
-            return (
-              <div className='col-md-4' key={element.url}>
-                <NewsItem 
-                  title={element.title ? element.title.slice(0, 49) : ""}
-                  description={element.description ? element.description.slice(0, 80) : ""}
-                  imgUrl={element.urlToImage}
-                  newsUrl={element.url}
-                  author={element.author}
-                  date={element.publishedAt}
-                  source={element.source.name}
-                />
-              </div>
-            )
-          })}
-        </div>
-
-        <div className='container d-flex justify-content-between'>
-          <button disabled={this.state.page <= 1} type='button' className="btn btn-primary" onClick={this.handlePreviousClick}>
-            &larr; Previous
-          </button>
-          
-          {/* Display current page and total pages */}
-          <div className='text-center my-3'>
-            <strong>Page: {this.state.page} of {this.state.loading ? '...' : totalPages}</strong> {/* Show '...' during loading */}
+      <div className='row'>
+        {!loading && articles.map((element) => (
+          <div className='col-md-4' key={element.url}>
+            <NewsItem 
+              title={element.title ? element.title.slice(0, 49) : ""}
+              description={element.description ? element.description.slice(0, 80) : ""}
+              imgUrl={element.urlToImage}
+              newsUrl={element.url}
+              author={element.author}
+              date={element.publishedAt}
+              source={element.source.name}
+            />
           </div>
-          
-          <button 
-            disabled={this.state.page + 1 > totalPages} 
-            type='button' 
-            className="btn btn-primary" 
-            onClick={this.handleNextClick}>
-            Next &rarr;
-          </button>
-        </div>
+        ))}
       </div>
-    )
-  }
-}
+
+      <div className='container d-flex justify-content-between'>
+        <button disabled={page <= 1} type='button' className="btn btn-primary" onClick={handlePreviousClick}>
+          &larr; Previous
+        </button>
+
+        <div className='text-center my-3'>
+          <strong>Page: {page} of {loading ? '...' : totalPages}</strong>
+        </div>
+
+        <button 
+          disabled={page + 1 > totalPages} 
+          type='button' 
+          className="btn btn-primary" 
+          onClick={handleNextClick}>
+          Next &rarr;
+        </button>
+      </div>
+    </div>
+  );
+};
+
+News.defaultProps = {
+  country: 'in',
+  pageSize: 12,
+  category: "general",
+};
+
+News.propTypes = {
+  country: PropTypes.string,
+  pageSize: PropTypes.number,
+  category: PropTypes.string,
+};
 
 export default News;
